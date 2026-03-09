@@ -11,6 +11,7 @@ import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import Resume from "./components/Resume";
 import NotFound from "./components/NotFound";
+import Forbidden from "./components/Forbidden";
 
 function HomePage() {
   return (
@@ -37,6 +38,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/resume" element={<Resume />} />
+        <Route path="/assets" element={<Forbidden />} />
+        <Route path="/assets/*" element={<Forbidden />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

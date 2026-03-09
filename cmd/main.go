@@ -11,40 +11,6 @@ import (
 	sbkashif "github.com/kashifsb/sbkashif"
 )
 
-const forbidden403HTML = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>403 Forbidden</title>
-<link rel="icon" type="image/svg+xml" href="/logo/favicon.svg"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#020617;color:#f8fafc;font-family:'Inter',system-ui,sans-serif;
-background-image:radial-gradient(circle,rgba(148,163,184,.08) 1px,transparent 1px);background-size:32px 32px}
-.c{text-align:center;max-width:28rem;padding:1.5rem}
-.icon{width:4rem;height:4rem;margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;border-radius:1rem;border:1px solid rgba(30,41,59,.5);background:rgba(15,23,42,.5)}
-.icon svg{color:#22d3ee}
-h1{font-size:clamp(4rem,12vw,6rem);font-weight:700;background:linear-gradient(135deg,#22d3ee,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
-.cmd{font-family:'JetBrains Mono',monospace;color:#94a3b8;font-size:.875rem;margin-bottom:.5rem}
-.msg{font-family:'JetBrains Mono',monospace;color:#475569;font-size:.8rem;margin-bottom:2rem}
-a{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-radius:.5rem;background:linear-gradient(135deg,#22d3ee,#3b82f6);color:#020617;font-size:.875rem;font-weight:500;text-decoration:none;transition:opacity .2s}
-a:hover{opacity:.9}
-a svg{width:1rem;height:1rem}
-</style>
-</head>
-<body>
-<div class="c">
-<div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-<h1>403</h1>
-<p class="cmd">$ access /assets/</p>
-<p class="msg">Forbidden — you don't have permission to access this resource.</p>
-<a href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>Back to Home</a>
-</div>
-</body>
-</html>`
-
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -78,10 +44,9 @@ func main() {
 			http.FileServerFS(staticFS).ServeHTTP(w, r)
 			return
 		}
-		// Block directory listing — serve a styled 403 page
+		// Directory listing blocked — SPA fallback renders the 403 page
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte(forbidden403HTML))
+		w.Write(indexHTML)
 	})
 
 	// Resume download
@@ -104,7 +69,7 @@ func main() {
 		// Try to serve the file if it exists in the embedded FS
 		if path != "" {
 			if f, err := staticFS.(fs.ReadFileFS).ReadFile(path); err == nil {
-				_ = f // file exists, let the file server handle it
+				_ = f
 				fileServer.ServeHTTP(w, r)
 				return
 			}
